@@ -60,20 +60,19 @@ def create_database():
         title TEXT,
         description TEXT,
         due_date DATE,
-        status TEXT DEFAULT 'pending' -- 'pending' or 'completed'
+        status TEXT DEFAULT 'pending'
     )
     ''')
 
-    # 2. Populate Initial Data (Migrated from your old list)
+    # 2. Populate Data (Polished Spelling)
     
     # Courses
     courses = [
-        ('EMAT101L', 'Engineering Calculus', 4, 'Mathematics (Maths)'),
+        ('EMAT101L', 'Engineering Calculus', 4, 'Mathematics'),
         ('CSET301', 'Artificial Intelligence and Machine Learning', 4, 'Computer Science'),
         ('CSET243', 'Data Structures using C++', 4, 'Computer Science'),
         ('CSET201', 'Information Management Systems', 4, 'Computer Science'),
         ('CSET365', 'Web Security', 3, 'Computer Science'),
-        # Add more courses here if needed...
     ]
     cursor.executemany('INSERT OR IGNORE INTO courses VALUES (?,?,?,?)', courses)
 
@@ -102,7 +101,7 @@ def create_database():
     # Initial Deadlines
     deadlines = [
         ('AI Assignment 1', 'Neural Networks Basics', '2025-11-15', 'pending'),
-        ('Web Sec Project', 'Vulnerability Scan', '2025-10-20', 'completed'), # Example of a passed/completed one
+        ('Web Sec Project', 'Vulnerability Scan', '2025-10-20', 'completed'), 
     ]
     cursor.executemany('INSERT OR IGNORE INTO deadlines (title, description, due_date, status) VALUES (?,?,?,?)', deadlines)
 

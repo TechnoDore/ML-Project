@@ -1,56 +1,64 @@
 # dataset.py
-# Contains training sentences for the ML model.
+# Expanded training sentences with ACRONYMS to teach the ML model.
 
 TRAINING_QUERIES = [
-    # Syllabus
+    # --- Syllabus & Course Content ---
     ("syllabus for Engineering Calculus", "syllabus"), 
     ("what is covered in CSET243", "syllabus"),
     ("course content for Information Management Systems", "syllabus"), 
     ("topics in High Performance Computing", "syllabus"),
-    ("what do I need to study for CSET201", "syllabus"),
-    ("what should I prepare for CSET301", "syllabus"),
     ("what to read for Exam", "syllabus"),
+    ("syllabus for ML", "syllabus"),
+    ("topics in DS", "syllabus"),
+    ("web sec syllabus", "syllabus"),
+    ("AI course content", "syllabus"),
 
-    # Professor
+    # --- Professor & Contact Info ---
     ("who teaches Data Structures", "professor"), 
     ("contact details for the UI/UX professor", "professor"), 
-    ("who is the instructor for Automata Theory", "professor"), 
     ("where does Dr. Vikram sit", "professor"), 
-    ("where is the office of Prof Sharma", "professor"), 
-    ("cabin location of the HOD", "professor"), 
     ("professor's room number", "professor"),
-    ("where can I find the teacher", "professor"),
+    ("who teaches ML", "professor"),
+    ("prof for DS", "professor"),
+    ("faculty for AI", "professor"),
+    ("Web Security teacher", "professor"),
+    ("Priya ma'am office", "professor"),
+    ("Vikram sir cabin", "professor"),
 
-    # PYQ
+    # --- PYQ (Past Year Questions) ---
     ("past year questions for Probability and Statistics", "pyq"), 
     ("previous exam papers for CSET201", "pyq"),
-    ("old questions for data structures", "pyq"), 
-    ("old papers for maths", "pyq"),
     ("question paper for physics", "pyq"),
-    
-    # Deadline (READING)
+    ("PYQ for ML", "pyq"),
+    ("DS previous papers", "pyq"),
+    ("last year paper AI", "pyq"),
+
+    # --- Deadlines (Reading) ---
     ("when is the assignment due", "deadline"), 
     ("upcoming deadlines", "deadline"), 
-    ("exam dates", "deadline"), 
     ("is there any work pending", "deadline"),
-    ("what assignments are left", "deadline"),
     ("show passed deadlines", "deadline_history"),
-    ("what deadlines are completed", "deadline_history"),
-    ("previous deadlines", "deadline_history"),
+    ("history of tasks", "deadline_history"),
 
-    # Deadline (SETTING & MARKING)
+    # --- Deadlines (Writing) ---
     ("add deadline", "add_deadline_intent"),
-    ("set a new deadline", "add_deadline_intent"),
     ("I want to add a task", "add_deadline_intent"),
+    ("remind me to submit project", "add_deadline_intent"),
+    ("submit ML assignment next friday", "add_deadline_intent"),
+    ("add web sec project by monday", "add_deadline_intent"),
     ("mark task as done", "mark_deadline_intent"),
-    ("mark assignment as completed", "mark_deadline_intent"),
+    ("I finished the Web Sec Project", "mark_deadline_intent"),
+    ("ML assignment completed", "mark_deadline_intent"),
+    ("mark DS homework as done", "mark_deadline_intent"),
 
-    # Location
+    # --- Location ---
     ("where is the library", "location"), 
     ("how to get to the computer lab", "location"),
     ("location of cafeteria", "location"),
+    ("lab location", "location"),
+    ("where is the canteen", "location"),
 
-    # Greeting
+    # --- Greeting ---
     ("hi", "greeting"), 
     ("hello", "greeting"),
     ("help", "greeting"),
