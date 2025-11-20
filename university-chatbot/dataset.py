@@ -1,270 +1,57 @@
 # dataset.py
-# This file contains all the data for training the ML model and populating the database.
-# Data has been extracted from the provided PDF and MASSIVELY EXPANDED to be complete and consistent.
+# Contains training sentences for the ML model.
 
-# --- 1. Machine Learning Training Data ---
-# More examples added for better accuracy.
 TRAINING_QUERIES = [
-    # Syllabus Intent
+    # Syllabus
     ("syllabus for Engineering Calculus", "syllabus"), 
     ("what is covered in CSET243", "syllabus"),
     ("course content for Information Management Systems", "syllabus"), 
     ("topics in High Performance Computing", "syllabus"),
-    ("course outline for Penetration Testing", "syllabus"), 
-    ("can I see the topics for NLP?", "syllabus"),
-    ("what's on the Modern Cryptography syllabus", "syllabus"), 
-    ("show me the syllabus for CSET344", "syllabus"),
-    ("give me the curriculum for CSET205", "syllabus"),
-    ("what will we learn in CSET212", "syllabus"),
+    ("what do I need to study for CSET201", "syllabus"),
+    ("what should I prepare for CSET301", "syllabus"),
+    ("what to read for Exam", "syllabus"),
 
-    # Professor Intent
+    # Professor
     ("who teaches Data Structures", "professor"), 
-    ("professor for CSET240", "professor"),
     ("contact details for the UI/UX professor", "professor"), 
-    ("faculty for Blockchain", "professor"), 
     ("who is the instructor for Automata Theory", "professor"), 
-    ("tell me about the Web Security professor", "professor"),
-    ("who's teaching CSET301", "professor"),
-    ("list all professors", "professor"),
+    ("where does Dr. Vikram sit", "professor"), 
+    ("where is the office of Prof Sharma", "professor"), 
+    ("cabin location of the HOD", "professor"), 
+    ("professor's room number", "professor"),
+    ("where can I find the teacher", "professor"),
 
-    # PYQ (Past Year Questions) Intent
+    # PYQ
     ("past year questions for Probability and Statistics", "pyq"), 
     ("previous exam papers for CSET201", "pyq"),
-    ("old questions for data structures using c++", "pyq"), 
-    ("last year paper for AI and Machine Learning", "pyq"),
-    ("sample questions for CSET365", "pyq"),
+    ("old questions for data structures", "pyq"), 
+    ("old papers for maths", "pyq"),
+    ("question paper for physics", "pyq"),
     
-    # Deadline Intent
+    # Deadline (READING)
     ("when is the assignment due", "deadline"), 
     ("upcoming deadlines", "deadline"), 
     ("exam dates", "deadline"), 
-    ("any important dates coming up?", "deadline"),
+    ("is there any work pending", "deadline"),
+    ("what assignments are left", "deadline"),
+    ("show passed deadlines", "deadline_history"),
+    ("what deadlines are completed", "deadline_history"),
+    ("previous deadlines", "deadline_history"),
 
-    # Location Intent
+    # Deadline (SETTING & MARKING)
+    ("add deadline", "add_deadline_intent"),
+    ("set a new deadline", "add_deadline_intent"),
+    ("I want to add a task", "add_deadline_intent"),
+    ("mark task as done", "mark_deadline_intent"),
+    ("mark assignment as completed", "mark_deadline_intent"),
+
+    # Location
     ("where is the library", "location"), 
     ("how to get to the computer lab", "location"),
-    ("admissions office location", "location"),
+    ("location of cafeteria", "location"),
 
-    # General Intent
-    ("how many credits for EMAT101L", "general"), 
-    ("list all courses", "general"),
-    ("hi", "general"), 
-    ("thank you", "general"),
-    ("help", "general"),
-]
-
-
-# --- 2. Database Population Data ---
-# This data is extracted from the PDF and now fully populated.
-
-COURSES_DATA = [
-    # 1st Semester
-    ('EMAT101L', 'Engineering Calculus', 4, 'Mathematics'),
-    ('2025CSET100', 'Computational Thinking and Programming', 4, 'Computer Science'),
-    ('2025CSET151', 'Introduction to Electrical and Electronics Engineering', 3, 'Computer Science'),
-    ('EPHY117L', 'Electromagnetism and Mechanics', 4, 'Physics'),
-    # 3rd Semester
-    ('CSET201', 'Information Management Systems', 4, 'Computer Science'),
-    ('CSET243', 'Data Structures using C++', 4, 'Computer Science'),
-    ('CSET240', 'Probability and Statistics', 4, 'Mathematics'),
-    ('CSET205', 'Software Engineering', 3, 'Computer Science'),
-    ('CSET208', 'Ethics for Engineers, Patents, Copyrights and IPR', 2, 'Humanities'),
-    ('CSET216', 'UI/UX Design for Human Computer Interface', 3, 'Computer Science'),
-    ('CSET211', 'Statistical Machine Learning', 3, 'Computer Science'),
-    ('CSET212', 'Blockchain Foundations', 3, 'Computer Science'),
-    ('CSET213', 'Linux and Shell Programming', 3, 'Computer Science'),
-    ('CSET214', 'Data Analysis using Python', 3, 'Computer Science'),
-    ('CSET215', 'Graphics and Visual Computing', 3, 'Computer Science'),
-    ('CSET217', 'Software Development with DevOps', 3, 'Computer Science'),
-    ('CSET218', 'Full Stack Development', 3, 'Computer Science'),
-    ('CSET224', 'Cloud Computing', 3, 'Computer Science'),
-    ('CSET219', 'Quantum Computing Foundations', 3, 'Computer Science'),
-    ('CSET222', 'Microcontrollers, Robotics & Embedded Systems', 3, 'Computer Science'),
-    ('CSET223', 'Augmented Reality Foundations', 3, 'Computer Science'),
-    # 5th Semester
-    ('CSET301', 'Artificial Intelligence and Machine Learning', 4, 'Computer Science'),
-    ('CSET302', 'Automata Theory and Computability', 4, 'Computer Science'),
-    ('CSET305', 'High Performance Computing', 3, 'Computer Science'),
-    ('CSET365', 'Web Security', 3, 'Computer Science'),
-    ('CSET344', 'Image and Video Processing', 3, 'Computer Science'),
-    ('CSET346', 'Natural Language Processing', 3, 'Computer Science'),
-    ('CSET358', 'Cloud Infrastructure and Services', 3, 'Computer Science'),
-    ('CSET363', 'Penetration Testing, Auditing and Ethical Hacking', 3, 'Computer Science'),
-    ('CSET370', 'Data Visualization and Dashboards', 3, 'Computer Science'),
-    ('CSET369', 'Time Series Analysis', 3, 'Computer Science'),
-    ('CSET371', 'Big Data Analytics and Business Intelligence', 3, 'Computer Science'),
-    ('CSET337', 'Augmented Reality', 3, 'Computer Science'),
-    ('CSET454', 'Test Automation in DevOps', 3, 'Computer Science'),
-    ('CSET457', 'Front-End Web UI Frameworks and Tools: Bootstrap', 3, 'Computer Science'),
-    ('CSET474', 'Quantum Computing for Data Analysis', 3, 'Computer Science'),
-    ('CSET480', 'IoT Analytics', 3, 'Computer Science'),
-    ('CSET313', 'User Centered Design', 3, 'Computer Science'),
-    ('CSET381', 'Applications of Al', 3, 'Computer Science'),
-    ('CSET382', 'Web Technologies', 3, 'Computer Science'),
-    ('CSET481', 'Software Testing', 3, 'Computer Science'),
-    ('CSET324', 'Software Project Management', 3, 'Computer Science'),
-    ('CSET326', 'Soft Computing', 3, 'Computer Science'),
-    # 7th Semester
-    ('CSET357', 'Modern Cryptography', 3, 'Computer Science'),
-    ('CSET343', 'Al in Healthcare', 3, 'Computer Science'),
-    ('CSET347', 'Social Network Analysis', 3, 'Computer Science'),
-    ('CSET380', 'Animation and Rendering Techniques', 3, 'Computer Science'),
-    ('CSET452', 'Software Containerization in DevOps', 3, 'Computer Science'),
-    ('CSET372', 'Advanced Database Management System', 3, 'Computer Science'),
-    ('CSET464', 'Developing Solutions for Microsoft Azure', 3, 'Computer Science'),
-    ('CSET477', 'Quantum Cryptography', 3, 'Computer Science'),
-    ('CSET479', 'Robotics: Dynamics and Controls', 3, 'Computer Science'),
-    ('CSET489', 'Search Engine Optimization', 3, 'Computer Science'),
-]
-
-PROFESSORS_DATA = [
-    # Core Subjects
-    ('Prof. Priya Sharma', 'priya.sharma@university.edu', 'Computer Science', 'A-101', 'Data Structures'),
-    ('Dr. Rajesh Kumar', 'rajesh.kumar@university.edu', 'Computer Science', 'A-102', 'Automata Theory'),
-    ('Prof. Anjali Mehta', 'anjali.mehta@university.edu', 'Mathematics', 'B-201', 'Probability and Statistics'),
-    ('Dr. Sameer Gupta', 'sameer.gupta@university.edu', 'Mathematics', 'B-202', 'Calculus'),
-    ('Prof. Kavita Singh', 'kavita.singh@university.edu', 'Physics', 'C-301', 'Electromagnetism'),
-    # AI/ML Specialization
-    ('Dr. Vikram Singh', 'vikram.singh@university.edu', 'Computer Science', 'D-401', 'Artificial Intelligence'),
-    ('Prof. Aisha Khan', 'aisha.khan@university.edu', 'Computer Science', 'D-402', 'Machine Learning'),
-    ('Dr. Rohan Joshi', 'rohan.joshi@university.edu', 'Computer Science', 'D-403', 'Natural Language Processing'),
-    ('Prof. Meera Iyer', 'meera.iyer@university.edu', 'Computer Science', 'D-404', 'Soft Computing'),
-    # Systems & Security
-    ('Dr. Arjun Reddy', 'arjun.reddy@university.edu', 'Computer Science', 'E-501', 'Web Security'),
-    ('Prof. Sunita Desai', 'sunita.desai@university.edu', 'Computer Science', 'E-502', 'Cryptography'),
-    ('Dr. Alok Nath', 'alok.nath@university.edu', 'Computer Science', 'E-503', 'High Performance Computing'),
-    ('Prof. Geeta Rao', 'geeta.rao@university.edu', 'Computer Science', 'E-504', 'Ethical Hacking'),
-    # Development & Software Engineering
-    ('Prof. Rohan Mehta', 'rohan.mehta@university.edu', 'Computer Science', 'F-601', 'Software Engineering'),
-    ('Dr. Divya Patel', 'divya.patel@university.edu', 'Computer Science', 'F-602', 'DevOps'),
-    ('Prof. Imran Ali', 'imran.ali@university.edu', 'Computer Science', 'F-603', 'Web Technologies'),
-    ('Dr. Sneha Verma', 'sneha.verma@university.edu', 'Computer Science', 'F-604', 'UI/UX Design'),
-]
-
-SYLLABUS_DATA = [
-    # (course_code, content, topics, pdf_path) - NOW COMPLETE FOR ALL COURSES
-    ('EMAT101L', 'Differential and Integral Calculus, Vector Calculus', 'Limits, Derivatives, Integration, Partial Derivatives, Vector Fields', 'pdfs/EMAT101L_Syllabus.pdf'),
-    ('2025CSET100', 'Algorithmic problem solving, Introduction to Python programming', 'Algorithms, Flowcharts, Variables, Loops, Functions', 'pdfs/2025CSET100_Syllabus.pdf'),
-    ('2025CSET151', 'Intro to circuits, diodes, and transistors', 'Kirchhoff\'s laws, Ohm\'s law, Semiconductor devices', 'pdfs/2025CSET151_Syllabus.pdf'),
-    ('EPHY117L', 'Classical mechanics and electromagnetic theory', 'Newton\'s Laws, Maxwell\'s Equations, Wave Optics', 'pdfs/EPHY117L_Syllabus.pdf'),
-    ('CSET201', 'Database concepts and SQL', 'ER Modeling, Relational Algebra, SQL Queries, Normalization', 'pdfs/CSET201_Syllabus.pdf'),
-    ('CSET243', 'Fundamental data structures using C++', 'Arrays, Stacks, Queues, Linked Lists, Trees, Graphs, Hashing', 'pdfs/CSET243_Syllabus.pdf'),
-    ('CSET240', 'Introduction to probability theory and statistical inference', 'Probability Axioms, Random Variables, Distributions, Hypothesis Testing', 'pdfs/CSET240_Syllabus.pdf'),
-    ('CSET205', 'Principles of software development lifecycle', 'SDLC Models, Agile, Scrum, UML, Requirements Engineering', 'pdfs/CSET205_Syllabus.pdf'),
-    ('CSET208', 'Legal frameworks for intellectual property', 'Patents, Copyrights, Trademarks, Trade Secrets, IPR laws in India', 'pdfs/CSET208_Syllabus.pdf'),
-    ('CSET216', 'Principles of User Interface and User Experience Design', 'User Research, Wireframing, Prototyping, Usability Testing', 'pdfs/CSET216_Syllabus.pdf'),
-    ('CSET211', 'Core concepts of statistical machine learning', 'Regression, Classification, Clustering, Dimensionality Reduction', 'pdfs/CSET211_Syllabus.pdf'),
-    ('CSET212', 'Fundamentals of Blockchain Technology', 'Cryptography, Consensus Mechanisms, Smart Contracts, DApps', 'pdfs/CSET212_Syllabus.pdf'),
-    ('CSET213', 'Linux command line and shell scripting', 'File System Navigation, Bash Scripting, Permissions, Process Management', 'pdfs/CSET213_Syllabus.pdf'),
-    ('CSET214', 'Using Python for data manipulation and analysis', 'Pandas, NumPy, Matplotlib, Data Cleaning, Exploratory Data Analysis', 'pdfs/CSET214_Syllabus.pdf'),
-    ('CSET215', 'Fundamentals of computer graphics', '2D/3D Transformations, Rendering, Shading, OpenGL', 'pdfs/CSET215_Syllabus.pdf'),
-    ('CSET217', 'Introduction to DevOps practices and tools', 'CI/CD, Version Control (Git), Containerization (Docker), Automation', 'pdfs/CSET217_Syllabus.pdf'),
-    ('CSET218', 'Building full stack web applications', 'MERN Stack (MongoDB, Express, React, Node.js), REST APIs', 'pdfs/CSET218_Syllabus.pdf'),
-    ('CSET224', 'Introduction to cloud computing concepts', 'IaaS, PaaS, SaaS, Virtualization, AWS/Azure/GCP services', 'pdfs/CSET224_Syllabus.pdf'),
-    ('CSET219', 'Introduction to quantum mechanics and computing', 'Qubits, Superposition, Entanglement, Quantum Gates', 'pdfs/CSET219_Syllabus.pdf'),
-    ('CSET222', 'Programming embedded systems and robotics', 'Arduino, Raspberry Pi, Sensors, Actuators, Microcontroller Architecture', 'pdfs/CSET222_Syllabus.pdf'),
-    ('CSET223', 'Introduction to Augmented Reality', 'ARCore, ARKit, Unity, 3D Object Tracking, Marker-based AR', 'pdfs/CSET223_Syllabus.pdf'),
-    ('CSET301', 'Core AI concepts, search algorithms, knowledge representation', 'Heuristic Search, Game Theory, Logic and Reasoning, Machine Learning Intro', 'pdfs/CSET301_Syllabus.pdf'),
-    ('CSET302', 'Formal languages, automata, and computability theory', 'Finite Automata, Regular Expressions, Context-Free Grammars, Turing Machines', 'pdfs/CSET302_Syllabus.pdf'),
-    ('CSET305', 'Parallel and distributed computing architectures', 'Parallel Algorithms, CUDA, MPI, OpenMP', 'pdfs/CSET305_Syllabus.pdf'),
-    ('CSET365', 'Principles of securing web applications', 'OWASP Top 10, SQL Injection, XSS, CSRF, Secure Coding Practices', 'pdfs/CSET365_Syllabus.pdf'),
-    ('CSET344', 'Digital image and video processing techniques', 'Image Enhancement, Filtering, Segmentation, Feature Extraction', 'pdfs/CSET344_Syllabus.pdf'),
-    ('CSET346', 'Techniques for processing and analyzing natural language', 'Text Preprocessing, Language Models, Sentiment Analysis, Machine Translation', 'pdfs/CSET346_Syllabus.pdf'),
-    ('CSET358', 'Managing cloud infrastructure and services', 'Virtual Networking, Cloud Storage, IAM, Cloud Security', 'pdfs/CSET358_Syllabus.pdf'),
-    ('CSET363', 'Techniques for ethical hacking and penetration testing', 'Reconnaissance, Scanning, Gaining Access, Maintaining Access, Covering Tracks', 'pdfs/CSET363_Syllabus.pdf'),
-    ('CSET370', 'Principles of data visualization', 'Tableau, PowerBI, D3.js, Charting, Dashboard Design', 'pdfs/CSET370_Syllabus.pdf'),
-    ('CSET369', 'Analysis of time-ordered data points', 'ARIMA, LSTM, Forecasting, Seasonality, Trend Analysis', 'pdfs/CSET369_Syllabus.pdf'),
-    ('CSET371', 'Tools and techniques for big data', 'Hadoop, Spark, MapReduce, NoSQL Databases, Business Intelligence', 'pdfs/CSET371_Syllabus.pdf'),
-    ('CSET337', 'Advanced concepts in Augmented Reality', 'SLAM, Markerless Tracking, Environmental Understanding', 'pdfs/CSET337_Syllabus.pdf'),
-    ('CSET454', 'Automated testing in a DevOps pipeline', 'Selenium, JUnit, TestNG, CI Integration', 'pdfs/CSET454_Syllabus.pdf'),
-    ('CSET457', 'Using Bootstrap for responsive web design', 'Grid System, Components, Utilities, Sass Customization', 'pdfs/CSET457_Syllabus.pdf'),
-    ('CSET474', 'Applying quantum algorithms to data analysis', 'Quantum Machine Learning, Shor\'s Algorithm, Grover\'s Algorithm', 'pdfs/CSET474_Syllabus.pdf'),
-    ('CSET480', 'Analyzing data from Internet of Things devices', 'IoT Protocols (MQTT), Time Series Databases, Edge Computing', 'pdfs/CSET480_Syllabus.pdf'),
-    ('CSET313', 'Designing products with a focus on user needs', 'Personas, Journey Mapping, Empathy Maps, User-Centered Design Process', 'pdfs/CSET313_Syllabus.pdf'),
-    ('CSET381', 'Real-world applications of Artificial Intelligence', 'Case Studies in Finance, Healthcare, and Autonomous Systems', 'pdfs/CSET381_Syllabus.pdf'),
-    ('CSET382', 'Core web technologies and frameworks', 'HTML, CSS, JavaScript, REST APIs, Introduction to React/Angular/Vue', 'pdfs/CSET382_Syllabus.pdf'),
-    ('CSET481', 'Methods and theories of software testing', 'Unit Testing, Integration Testing, System Testing, Black-box/White-box Testing', 'pdfs/CSET481_Syllabus.pdf'),
-    ('CSET324', 'Managing software projects from inception to completion', 'Agile Project Management, Scrum, Kanban, Risk Management', 'pdfs/CSET324_Syllabus.pdf'),
-    ('CSET326', 'Introduction to soft computing paradigms', 'Fuzzy Logic, Neural Networks, Genetic Algorithms, Swarm Intelligence', 'pdfs/CSET326_Syllabus.pdf'),
-    ('CSET357', 'Concepts of modern cryptographic algorithms', 'Symmetric and Asymmetric Encryption, Hash Functions, Digital Signatures, RSA, AES', 'pdfs/CSET357_Syllabus.pdf'),
-    ('CSET343', 'Application of AI in the healthcare domain', 'Medical Image Analysis, Predictive Diagnostics, Drug Discovery, EHR Processing', 'pdfs/CSET343_Syllabus.pdf'),
-    ('CSET347', 'Analyzing structure and patterns in social networks', 'Graph Theory, Centrality Measures, Community Detection, Link Prediction', 'pdfs/CSET347_Syllabus.pdf'),
-    ('CSET380', 'Techniques for computer animation and rendering', 'Ray Tracing, Modeling, Texturing, Rigging, Animation Principles', 'pdfs/CSET380_Syllabus.pdf'),
-    ('CSET452', 'Using containers in a DevOps workflow', 'Docker, Kubernetes, Container Orchestration, Microservices Architecture', 'pdfs/CSET452_Syllabus.pdf'),
-    ('CSET372', 'Advanced topics in database management', 'Distributed Databases, NoSQL Models, Data Warehousing, Query Optimization', 'pdfs/CSET372_Syllabus.pdf'),
-    ('CSET464', 'Building and deploying applications on Microsoft Azure', 'Azure App Service, Azure Functions, Cosmos DB, Azure Storage', 'pdfs/CSET464_Syllabus.pdf'),
-    ('CSET477', 'Cryptography in the age of quantum computers', 'Post-Quantum Cryptography, Quantum Key Distribution', 'pdfs/CSET477_Syllabus.pdf'),
-    ('CSET479', 'Principles of robot dynamics and control systems', 'Kinematics, Jacobians, Trajectory Planning, PID Control', 'pdfs/CSET479_Syllabus.pdf'),
-    ('CSET489', 'Techniques for optimizing websites for search engines', 'On-Page SEO, Off-Page SEO, Keyword Research, Technical SEO', 'pdfs/CSET489_Syllabus.pdf'),
-]
-
-PYQS_DATA = [
-    # (course_code, year, semester, questions) - NOW COMPLETE FOR ALL COURSES
-    ('EMAT101L', 2024, 'Fall', 'Q1: Find the derivative of x^sin(x).\nQ2: Evaluate the integral of (x^2 + 1) dx.'),
-    ('2025CSET100', 2024, 'Fall', 'Q1: Write a Python function to check for a prime number.\nQ2: What is recursion?'),
-    ('2025CSET151', 2024, 'Fall', 'Q1: Explain Kirchhoff\'s Voltage Law (KVL).\nQ2: What is a diode?'),
-    ('EPHY117L', 2024, 'Fall', 'Q1: State Newton\'s three laws of motion.\nQ2: What are Maxwell\'s equations?'),
-    ('CSET201', 2024, 'Fall', 'Q1: What is database normalization?\nQ2: Write an SQL query to join two tables.'),
-    ('CSET243', 2024, 'Fall', 'Q1: Implement a stack using two queues.\nQ2: Write C++ code for a binary tree traversal.'),
-    ('CSET240', 2024, 'Fall', 'Q1: State Bayes\' theorem and its significance.\nQ2: What is a p-value?'),
-    ('CSET205', 2024, 'Fall', 'Q1: Compare and contrast Agile and Waterfall models.\nQ2: Draw a UML Use Case diagram for a login system.'),
-    ('CSET208', 2024, 'Fall', 'Q1: What is the difference between a patent and a copyright?\nQ2: Explain Fair Use.'),
-    ('CSET216', 2024, 'Fall', 'Q1: What is a user persona?\nQ2: Describe the process of wireframing.'),
-    ('CSET211', 2024, 'Fall', 'Q1: What is overfitting?\nQ2: Explain gradient descent.'),
-    ('CSET212', 2024, 'Fall', 'Q1: What is Proof-of-Work?\nQ2: Explain what a smart contract is.'),
-    ('CSET213', 2024, 'Fall', 'Q1: Write a shell script to count files in a directory.\nQ2: What is the purpose of the `chmod` command?'),
-    ('CSET214', 2024, 'Fall', 'Q1: How do you handle missing values in a Pandas DataFrame?\nQ2: What is a NumPy array?'),
-    ('CSET215', 2024, 'Fall', 'Q1: What is a transformation matrix?\nQ2: Explain the graphics rendering pipeline.'),
-    ('CSET217', 2024, 'Fall', 'Q1: What is Continuous Integration (CI)?\nQ2: What is a Docker container?'),
-    ('CSET218', 2024, 'Fall', 'Q1: What is a REST API?\nQ2: Explain the virtual DOM in React.'),
-    ('CSET224', 2024, 'Fall', 'Q1: Compare IaaS, PaaS, and SaaS.\nQ2: What is serverless computing?'),
-    ('CSET219', 2024, 'Fall', 'Q1: What is a qubit?\nQ2: Explain quantum superposition.'),
-    ('CSET222', 2024, 'Fall', 'Q1: What is the difference between a microcontroller and a microprocessor?\nQ2: What is PWM?'),
-    ('CSET223', 2024, 'Fall', 'Q1: What is SLAM in AR?\nQ2: Differentiate between AR and VR.'),
-    ('CSET301', 2024, 'Fall', 'Q1: Differentiate between classification and regression.\nQ2: Explain the bias-variance tradeoff.'),
-    ('CSET302', 2024, 'Fall', 'Q1: What is a Turing Machine?\nQ2: Design a finite automaton for a given regular expression.'),
-    ('CSET305', 2024, 'Fall', 'Q1: What is Amdahl\'s law?\nQ2: Compare MPI and OpenMP.'),
-    ('CSET365', 2024, 'Fall', 'Q1: What is SQL Injection and how can it be prevented?\nQ2: Describe Cross-Site Scripting (XSS).'),
-    ('CSET344', 2024, 'Fall', 'Q1: What is a histogram in image processing?\nQ2: Explain the Canny edge detector.'),
-    ('CSET346', 2024, 'Fall', 'Q1: What is TF-IDF?\nQ2: Describe the architecture of a simple chatbot.'),
-    ('CSET358', 2024, 'Fall', 'Q1: What is a Virtual Private Cloud (VPC)?\nQ2: What is AWS S3?'),
-    ('CSET363', 2024, 'Fall', 'Q1: What are the phases of penetration testing?\nQ2: What is Nmap used for?'),
-    ('CSET370', 2024, 'Fall', 'Q1: What is the difference between a bar chart and a histogram?\nQ2: Name two popular data visualization libraries.'),
-    ('CSET369', 2024, 'Fall', 'Q1: What is a moving average?\nQ2: Explain what an LSTM network is.'),
-    ('CSET371', 2024, 'Fall', 'Q1: What is Hadoop MapReduce?\nQ2: Compare SQL and NoSQL databases.'),
-    ('CSET337', 2024, 'Fall', 'Q1: What is markerless tracking in AR?\nQ2: How does AR environmental understanding work?'),
-    ('CSET454', 2024, 'Fall', 'Q1: What is Selenium WebDriver?\nQ2: What is an assertion in testing?'),
-    ('CSET457', 2024, 'Fall', 'Q1: Explain the Bootstrap grid system.\nQ2: What is a Bootstrap modal?'),
-    ('CSET474', 2024, 'Fall', 'Q1: What is Grover\'s algorithm used for?\nQ2: Explain the concept of Quantum Machine Learning.'),
-    ('CSET480', 2024, 'Fall', 'Q1: What is MQTT?\nQ2: What is edge computing in the context of IoT?'),
-    ('CSET313', 2024, 'Fall', 'Q1: What is a user journey map?\nQ2: Why is user-centered design important?'),
-    ('CSET381', 2024, 'Fall', 'Q1: Give an example of AI in finance.\nQ2: How can AI be used in healthcare diagnostics?'),
-    ('CSET382', 2024, 'Fall', 'Q1: What is the DOM?\nQ2: Explain the box model in CSS.'),
-    ('CSET481', 2024, 'Fall', 'Q1: Differentiate between black-box and white-box testing.\nQ2: What is regression testing?'),
-    ('CSET324', 2024, 'Fall', 'Q1: What are the main ceremonies in Scrum?\nQ2: What is a Gantt chart?'),
-    ('CSET326', 2024, 'Fall', 'Q1: What is a fuzzy logic system?\nQ2: How do genetic algorithms work?'),
-    ('CSET357', 2024, 'Fall', 'Q1: Explain the difference between symmetric and asymmetric encryption.\nQ2: How does the RSA algorithm work?'),
-    ('CSET343', 2024, 'Fall', 'Q1: How can machine learning be used for medical image analysis?\nQ2: What are some ethical concerns of AI in healthcare?'),
-    ('CSET347', 2024, 'Fall', 'Q1: What is a centrality measure in a network?\nQ2: What is community detection?'),
-    ('CSET380', 2024, 'Fall', 'Q1: What is ray tracing?\nQ2: What is the difference between modeling and rigging?'),
-    ('CSET452', 2024, 'Fall', 'Q1: What is the difference between a Docker image and a container?\nQ2: What is Kubernetes?'),
-    ('CSET372', 2024, 'Fall', 'Q1: Compare and contrast SQL and NoSQL databases.\nQ2: What is data warehousing?'),
-    ('CSET464', 2024, 'Fall', 'Q1: What are Azure Functions?\nQ2: What is Azure Cosmos DB?'),
-    ('CSET477', 2024, 'Fall', 'Q1: What is Quantum Key Distribution (QKD)?\nQ2: Why is current cryptography vulnerable to quantum computers?'),
-    ('CSET479', 2024, 'Fall', 'Q1: What is inverse kinematics in robotics?\nQ2: What is a PID controller?'),
-    ('CSET489', 2024, 'Fall', 'Q1: What is the difference between on-page and off-page SEO?\nQ2: What is keyword research?'),
-]
-
-
-DEADLINES_DATA = [
-    ('Data Structures Assignment 2', 'Implementation of a hash table', '2025-11-15', 'CSET243', 'assignment'),
-    ('Web Security Project', 'Identify and fix vulnerabilities in a sample web app', '2025-11-20', 'CSET365', 'project'),
-    ('AI & ML Mid-Term Exam', 'Covers all topics from Week 1 to Week 7', '2025-10-15', 'CSET301', 'exam'),
-]
-
-LOCATIONS_DATA = [
-    ('Library', 'Main Campus Building', 2, '9 AM - 10 PM'),
-    ('Computer Lab', 'Tech Building', 1, '8 AM - 11 PM'),
-    ('Cafeteria', 'Student Hub', 1, '7 AM - 9 PM'),
-    ('Admissions Office', 'Admin Block', 0, '9 AM - 5 PM'),
+    # Greeting
+    ("hi", "greeting"), 
+    ("hello", "greeting"),
+    ("help", "greeting"),
 ]

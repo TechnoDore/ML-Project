@@ -1,276 +1,241 @@
-# University Information Chatbot
-# This final version includes the corrected, robust rule for identifying entities.
-
-import os
-from typing import Dict, List, Tuple, Optional
+import sqlite3
 import re
-import warnings
-
-# NLP and ML imports
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from datetime import datetime
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import SVC
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+import nltk
+import warnings
+import google.generativeai as genai
+
+# --- CONFIGURATION ---
+GOOGLE_API_KEY = "YOUR_API_KEY_HERE"
+DB_PATH = 'university.db'
+
+genai.configure(api_key=GOOGLE_API_KEY)
+try:
+    model = genai.GenerativeModel('gemini-pro')
+except:
+    model = None
+
+# Import training data
+from dataset import TRAINING_QUERIES
 
 warnings.filterwarnings('ignore')
 
-# --- IMPORTING all data directly from the dataset file ---
-from dataset import (
-    TRAINING_QUERIES, COURSES_DATA, PROFESSORS_DATA, SYLLABUS_DATA,
-    PYQS_DATA, DEADLINES_DATA, LOCATIONS_DATA
-)
-
-# --- NLTK DOWNLOAD SECTION ---
 def download_nltk_data():
-    """Downloads all necessary NLTK data models if they are not found."""
-    required_data = [
-        ('tokenizers/punkt', 'punkt'),
-        ('corpora/stopwords', 'stopwords'),
-        ('corpora/wordnet', 'wordnet'),
-        ('taggers/averaged_perceptron_tagger', 'averaged_perceptron_tagger')
-    ]
-    for path, model in required_data:
+    resources = ['punkt', 'wordnet', 'stopwords']
+    for res in resources:
         try:
-            nltk.data.find(path)
+            nltk.data.find(f'tokenizers/{res}') if res == 'punkt' else nltk.data.find(f'corpora/{res}')
         except LookupError:
-            print(f"NLTK data '{model}' not found. Downloading...")
-            nltk.download(model, quiet=True)
-            print(f"'{model}' downloaded successfully.")
-
+            nltk.download(res, quiet=True)
 download_nltk_data()
 
+# --- DB HELPER ---
+def get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-class TextPreprocessor:
+class NLPProcessor:
     def __init__(self):
         self.lemmatizer = WordNetLemmatizer()
-        self.stop_words = set(stopwords.words('english')) - {'who', 'what', 'when', 'where', 'which', 'how'}
-    
-    def preprocess(self, text: str) -> str:
+        self.stop_words = set(stopwords.words('english'))
+
+    def preprocess(self, text):
         tokens = word_tokenize(text.lower())
-        tokens = [self.lemmatizer.lemmatize(token) for token in tokens if token.isalnum() and token not in self.stop_words]
-        return ' '.join(tokens)
+        tokens = [self.lemmatizer.lemmatize(t) for t in tokens if t.isalnum() and t not in self.stop_words]
+        return " ".join(tokens)
 
 class IntentClassifier:
-    def __init__(self):
-        self.preprocessor = TextPreprocessor()
-        self.vectorizer = TfidfVectorizer(max_features=150, ngram_range=(1, 2))
-        self.model = SVC(kernel='linear', probability=True, C=1.2)
-        self.is_trained = False
-    
-    def prepare_training_data(self) -> Tuple[List[str], List[str]]:
-        queries, labels = zip(*TRAINING_QUERIES)
-        return list(queries), list(labels)
+    def __init__(self, processor):
+        self.processor = processor
+        self.vectorizer = TfidfVectorizer()
+        self.classifier = SVC(kernel='linear', probability=True)
+        self.train()
 
     def train(self):
-        X_raw, y = self.prepare_training_data()
-        X_processed = [self.preprocessor.preprocess(text) for text in X_raw]
-        X_tfidf = self.vectorizer.fit_transform(X_processed)
-        self.model.fit(X_tfidf, y)
-        self.is_trained = True
-        print("Intent classification model trained successfully.")
-    
-    def predict_intent(self, query: str) -> Tuple[str, float]:
-        if not self.is_trained: self.train()
-        processed_query = self.preprocessor.preprocess(query)
-        X = self.vectorizer.transform([processed_query])
-        intent = self.model.predict(X)[0]
-        confidence = max(self.model.predict_proba(X)[0])
-        return intent, confidence
+        queries, labels = zip(*TRAINING_QUERIES)
+        processed_queries = [self.processor.preprocess(q) for q in queries]
+        X_vectors = self.vectorizer.fit_transform(processed_queries)
+        self.classifier.fit(X_vectors, labels)
+
+    def predict(self, text):
+        processed = self.processor.preprocess(text)
+        vector = self.vectorizer.transform([processed])
+        intent = self.classifier.predict(vector)[0]
+        probs = self.classifier.predict_proba(vector)
+        return intent, np.max(probs)
+
+class EntityMatcher:
+    def __init__(self, processor):
+        self.processor = processor
+        self.vectorizer = TfidfVectorizer()
+
+    def find_best_match_sql(self, user_query, table, columns):
+        conn = get_db_connection()
+        rows = conn.execute(f"SELECT * FROM {table}").fetchall()
+        conn.close()
+
+        if not rows: return None, 0
+        
+        search_candidates = [" ".join([str(row[col]) for col in columns if row[col]]) for row in rows]
+        
+        processed_query = self.processor.preprocess(user_query)
+        processed_candidates = [self.processor.preprocess(c) for c in search_candidates]
+        
+        all_text = processed_candidates + [processed_query]
+        tfidf_matrix = self.vectorizer.fit_transform(all_text)
+        
+        query_vec = tfidf_matrix[-1]
+        candidate_vecs = tfidf_matrix[:-1]
+        
+        cosine_scores = cosine_similarity(query_vec, candidate_vecs).flatten()
+        best_idx = np.argmax(cosine_scores)
+        return rows[best_idx], cosine_scores[best_idx]
 
 class UniversityChatbot:
     def __init__(self):
-        self.classifier = IntentClassifier()
-        self.course_code_to_name = {code: name for code, name, _, _ in COURSES_DATA}
-        print("Initializing chatbot...")
-        self.classifier.train()
-        print("Chatbot ready!")
+        self.processor = NLPProcessor()
+        self.intent_classifier = IntentClassifier(self.processor)
+        self.entity_matcher = EntityMatcher(self.processor)
 
-    # --- IN-MEMORY DATA FETCHING FUNCTIONS ---
-    
-    def _get_syllabus_from_memory(self, entity: str) -> Optional[Dict]:
-        entity_upper = entity.upper()
-        # Search by course code
-        for s_code, s_content, s_topics, s_pdf in SYLLABUS_DATA:
-            if s_code.upper() == entity_upper:
-                course_name = self.course_code_to_name.get(s_code, s_code)
-                return {'course_name': course_name, 'content': s_content, 'topics': s_topics, 'pdf_url': s_pdf}
-        # Search by course name
-        for c_code, c_name, _, _ in COURSES_DATA:
-            if entity.lower() in c_name.lower():
-                for s_code, s_content, s_topics, s_pdf in SYLLABUS_DATA:
-                    if s_code == c_code:
-                        return {'course_name': c_name, 'content': s_content, 'topics': s_topics, 'pdf_url': s_pdf}
-        return None
+    def generate_ai_response(self, user_query, context_data):
+        try:
+            if "YOUR_API_KEY" in GOOGLE_API_KEY or not model: raise Exception()
+            prompt = f"Answer based on this data: {context_data}. User asked: {user_query}"
+            response = model.generate_content(prompt)
+            return response.text
+        except:
+            return f"Here is the information I found:\n\n{context_data}"
 
-    def _get_professor_details_from_memory(self, entity: str) -> List[Dict]:
-        found_profs = []
-        entity_lower = entity.lower()
-        for name, email, dept, office, spec in PROFESSORS_DATA:
-            if entity_lower in name.lower() or entity_lower in spec.lower():
-                found_profs.append({'name': name, 'email': email, 'department': dept, 'office': office, 'specialization': spec})
-        return found_profs
-
-    def _get_pyqs_from_memory(self, entity: str) -> List[Dict]:
-        found_pyqs = []
-        target_code = None
-        if entity.upper() in self.course_code_to_name:
-            target_code = entity.upper()
-        else:
-            for code, name in self.course_code_to_name.items():
-                if entity.lower() in name.lower():
-                    target_code = code
-                    break
-        
-        if target_code:
-            course_name = self.course_code_to_name.get(target_code, target_code)
-            for p_code, p_year, p_sem, p_qs in PYQS_DATA:
-                if p_code == target_code:
-                    found_pyqs.append({'course': course_name, 'year': p_year, 'semester': p_sem, 'questions': p_qs})
-        return found_pyqs
-
-    def _get_deadlines_from_memory(self) -> List[Dict]:
-        deadlines = []
-        for title, desc, date, code, type in DEADLINES_DATA:
-            course_name = self.course_code_to_name.get(code, "General")
-            deadlines.append({'title': title, 'description': desc, 'date': date, 'course': course_name, 'type': type})
-        return deadlines
-        
-    def _get_location_info_from_memory(self, entity: str) -> Optional[Dict]:
-        entity_lower = entity.lower()
-        for name, building, floor, hours in LOCATIONS_DATA:
-            if entity_lower in name.lower():
-                return {'name': name, 'building': building, 'floor': floor, 'hours': hours}
-        return None
-
-    def _extract_entity(self, query: str, intent: str = '') -> str:
-        stop_words = {
-            'for', 'of', 'the', 'a', 'an', 'show', 'me', 'what', 'is', 'who', 'get', 
-            'find', 'where', 'details', 'contact', 'syllabus', 'professor', 
-            'deadlines', 'pyq', 'questions', 'exam', 'paper', 'papers', 'instructor', 'faculty'
-        }
-        tokens = word_tokenize(query.lower())
-        
-        course_code_pattern = r'\b[a-zA-Z]{4,8}\d{3}[a-zA-Z]?\b'
-        codes = re.findall(course_code_pattern, query.upper())
-        if codes: return codes[0]
-        
-        # Don't return a professor's name here if the rule-based check already did.
-        # This function is for finding the subject when the intent is already known.
-        filtered_tokens = [word for word in tokens if word not in stop_words and word.isalnum()]
-        
-        if filtered_tokens: return ' '.join(filtered_tokens)
-        
-        return ''
-
-    def get_response(self, query: str) -> Dict:
-        query_lower = query.lower()
-        response_data = {'response': "I can help with questions about syllabus, professors, campus locations, and deadlines. How can I assist you?", 'data': None}
-
-        # --- Priority 1: Comprehensive Rule-based Shortcuts ---
-        
-        # --- CORRECTED RULE FOR PROFESSOR NAMES ---
-        for prof_name, _, _, _, _ in PROFESSORS_DATA:
-            # Check if the user's query is a substring of the full professor name
-            if query_lower in prof_name.lower():
-                print(f"Professor name match for '{query_lower}' found in '{prof_name}'. Bypassing ML.")
-                return self._handle_professor_query(query_lower, response_data)
-        
-        for loc_name, _, _, _ in LOCATIONS_DATA:
-            if loc_name.lower() in query_lower:
-                return self._handle_location_query(loc_name, response_data)
-
-        if 'all professors' in query_lower:
-            return self._handle_list_all_professors(response_data)
-        if 'deadline' in query_lower or 'due' in query_lower:
-            return self._handle_deadline_query(response_data)
-        if 'pyq' in query_lower or 'past year' in query_lower or 'exam paper' in query_lower:
-            entity = self._extract_entity(query, 'pyq')
-            return self._handle_pyq_query(entity, response_data)
-        if 'professor' in query_lower or 'faculty' in query_lower or 'instructor' in query_lower:
-            entity = self._extract_entity(query, 'professor')
-            return self._handle_professor_query(entity, response_data)
-        
-        for code, name, _, _ in COURSES_DATA:
-            if name.lower() in query_lower:
-                return self._handle_syllabus_query(name, response_data)
-
-        course_code_pattern = r'\b([a-zA-Z]{4,8}\d{3}[a-zA-Z]?)\b'
-        match = re.search(course_code_pattern, query.upper())
+    # --- DEADLINE LOGIC ---
+    def add_deadline_logic(self, message):
+        match = re.search(r'add deadline (.+?) by (\d{4}-\d{2}-\d{2})', message, re.IGNORECASE)
         if match:
-            entity = match.group(1)
-            return self._handle_syllabus_query(entity, response_data)
+            title = match.group(1)
+            date = match.group(2)
+            conn = get_db_connection()
+            conn.execute("INSERT INTO deadlines (title, due_date, status) VALUES (?, ?, 'pending')", (title, date))
+            conn.commit()
+            conn.close()
+            return f"✅ Added: **{title}** (Due: {date})"
+        return "To add a task, type: **'Add deadline [Name] by YYYY-MM-DD'**"
 
-        # --- Priority 2: ML-based fallback ---
-        
-        intent, confidence = self.classifier.predict_intent(query)
-        if confidence < 0.6: intent = 'general'
+    def mark_deadline_complete(self, message):
+        match = re.search(r'mark (.+?) as (done|completed)', message, re.IGNORECASE)
+        if match:
+            title_query = match.group(1).strip()
+            conn = get_db_connection()
+            rows = conn.execute("SELECT * FROM deadlines").fetchall()
             
-        entity = self._extract_entity(query, intent)
+            target_id = None
+            target_title = ""
+            for r in rows:
+                if title_query.lower() in r['title'].lower():
+                    target_id = r['id']
+                    target_title = r['title']
+                    break
+            
+            if target_id:
+                conn.execute("UPDATE deadlines SET status = 'completed' WHERE id = ?", (target_id,))
+                conn.commit()
+                conn.close()
+                return f"🎉 Marked **{target_title}** as completed!"
+            else:
+                conn.close()
+                return f"Could not find task '{title_query}'."
+        return "Type **'Mark [Name] as done'** to complete a task."
+
+    def get_deadline_status(self, filter_type):
+        conn = get_db_connection()
+        today = datetime.now().strftime('%Y-%m-%d')
         
-        if not entity and intent in ['syllabus', 'pyq']:
-             response_data['response'] = f"It seems you're asking about a {intent}. Could you please specify which course you're interested in?"
-             return response_data
+        if filter_type == 'upcoming':
+            rows = conn.execute("SELECT * FROM deadlines WHERE due_date >= ? ORDER BY due_date ASC", (today,)).fetchall()
+            header = "📅 **Upcoming Deadlines:**"
+        elif filter_type == 'passed':
+            rows = conn.execute("SELECT * FROM deadlines WHERE due_date < ? ORDER BY due_date DESC", (today,)).fetchall()
+            header = "⚠️ **Past/History:**"
+        
+        conn.close()
+        
+        if not rows: return f"{header}\nNo tasks found."
+            
+        text = f"{header}\n"
+        for r in rows:
+            marker = "✅" if r['status'] == 'completed' else "⏳"
+            text += f"{marker} **{r['title']}**: {r['due_date']}\n"
+        return text
 
-        if intent == 'syllabus': return self._handle_syllabus_query(entity, response_data)
-        elif intent == 'pyq': return self._handle_pyq_query(entity, response_data)
-        else: return response_data
+    def get_response(self, message):
+        intent, confidence = self.intent_classifier.predict(message)
+        
+        if "add deadline" in message.lower():
+            return {'response': self.add_deadline_logic(message), 'data': None}
+        if "mark" in message.lower() and ("done" in message.lower() or "completed" in message.lower()):
+            return {'response': self.mark_deadline_complete(message), 'data': None}
 
-    def _handle_list_all_professors(self, response: Dict) -> Dict:
-        prof_names = "\n".join([f"- {name}" for name, _, _, _, _ in PROFESSORS_DATA])
-        response['response'] = f"📋 Here is a list of all professors:\n\n{prof_names}\n\nYou can ask for details about any specific professor by name."
-        return response
+        if intent == 'greeting':
+            return {'response': "Hello! I am BU Buddy. I can help with Syllabus, Professors, Locations, and Deadlines.", 'data': None}
 
-    def _handle_syllabus_query(self, entity: str, response: Dict) -> Dict:
-        syllabus = self._get_syllabus_from_memory(entity)
-        if syllabus:
-            response['data'] = syllabus
-            response['response'] = f"📚 Here is the syllabus for **{syllabus['course_name']}**:\n\n**Course Content:**\n{syllabus['content']}\n\n**Topics Covered:**\n{syllabus['topics']}"
-        else:
-            response['response'] = f"Sorry, I couldn't find the syllabus for '{entity}'."
-        return response
+        context_info = ""
+        pdf_url = None
 
-    def _handle_professor_query(self, entity: str, response: Dict) -> Dict:
-        professors = self._get_professor_details_from_memory(entity)
-        if professors:
-            response['data'] = professors
-            prof_info = "\n\n".join([f"👤 **{p['name']}**\n📧 Email: {p['email']}\n🏢 Office: {p['office']}\n🎓 Specialization: {p['specialization']}" for p in professors])
-            response['response'] = f"Here are the details I found:\n\n{prof_info}"
-        else:
-            response['response'] = f"I couldn't find any professor matching '{entity}'."
-        return response
+        if intent == 'syllabus':
+            row, score = self.entity_matcher.find_best_match_sql(message, 'courses', ['code', 'name'])
+            if score > 0.15:
+                conn = get_db_connection()
+                syl = conn.execute("SELECT * FROM syllabus WHERE course_code=?", (row['code'],)).fetchone()
+                conn.close()
+                if syl:
+                    return {'response': f"Here is the Syllabus PDF for **{row['name']}**.", 'data': {'pdf_url': syl['pdf_url']}}
+                context_info = "Course found, but syllabus PDF is missing."
 
-    def _handle_pyq_query(self, entity: str, response: Dict) -> Dict:
-        pyqs = self._get_pyqs_from_memory(entity)
-        if pyqs:
-            response['data'] = pyqs
-            course_name_for_title = pyqs[0]['course']
-            pyq_info = "\n\n".join([f"📝 **{p['course']} - {p['year']} {p['semester']}**\n{p['questions']}" for p in pyqs])
-            response['response'] = f"Here are the past year questions for **{course_name_for_title}**:\n\n{pyq_info}"
-        else:
-            response['response'] = f"No past year questions found for '{entity}'."
-        return response
+        elif intent == 'pyq':
+            row, score = self.entity_matcher.find_best_match_sql(message, 'courses', ['code', 'name', 'dept'])
+            if score > 0.15:
+                conn = get_db_connection()
+                pyq = conn.execute("SELECT * FROM pyqs WHERE course_code=?", (row['code'],)).fetchone()
+                conn.close()
+                if pyq:
+                     return {'response': f"Here is the Past Year Paper for **{row['name']}**.", 'data': {'pdf_url': pyq['pdf_url']}}
+                context_info = f"No PYQs found for {row['name']}."
 
-    def _handle_deadline_query(self, response: Dict) -> Dict:
-        deadlines = self._get_deadlines_from_memory()
-        if deadlines:
-            response['data'] = deadlines
-            deadline_info = "\n\n".join([f"📅 **{d['title']}** ({d['course']})\n📝 {d['description']}\n🗓️ Due: {d['date']}" for d in deadlines])
-            response['response'] = f"Here are the upcoming deadlines:\n\n{deadline_info}"
-        else:
-            response['response'] = "No upcoming deadlines found."
-        return response
+        elif intent == 'professor':
+            if "list" in message.lower():
+                conn = get_db_connection()
+                rows = conn.execute("SELECT name, dept FROM professors").fetchall()
+                conn.close()
+                context_info = "Professors:\n" + "\n".join([f"- {r['name']} ({r['dept']})" for r in rows])
+            else:
+                row, score = self.entity_matcher.find_best_match_sql(message, 'professors', ['name', 'specialization', 'dept'])
+                if score > 0.15:
+                    context_info = f"👤 **{row['name']}**\n🏢 {row['office']}\n📧 {row['email']}\nSpec: {row['specialization']}"
 
-    def _handle_location_query(self, entity: str, response: Dict) -> Dict:
-        location = self._get_location_info_from_memory(entity)
-        if location:
-            response['data'] = location
-            response['response'] = (f"📍 Here's the information for the **{location['name']}**:\n\n"
-                                  f"**Building:** {location['building']}\n"
-                                  f"**Floor:** {location['floor']}\n"
-                                  f"**Hours:** {location['hours']}")
-        else:
-            response['response'] = f"Sorry, I couldn't find a location called '{entity}'."
-        return response
+        elif intent == 'location':
+            # 1. Try Location Table
+            row, score = self.entity_matcher.find_best_match_sql(message, 'locations', ['name'])
+            if score > 0.2:
+                 context_info = f"📍 **{row['name']}** is in **{row['building']}** (Floor {row['floor']})."
+            else:
+                # 2. Fallback to Professor (Smart Switching)
+                p_row, p_score = self.entity_matcher.find_best_match_sql(message, 'professors', ['name'])
+                if p_score > 0.15:
+                    context_info = f"👤 **{p_row['name']}** sits in **{p_row['office']}**."
 
+        elif intent == 'deadline':
+            return {'response': self.get_deadline_status('upcoming'), 'data': None}
+        
+        elif intent == 'deadline_history':
+            return {'response': self.get_deadline_status('passed'), 'data': None}
+
+        if context_info:
+            return {'response': self.generate_ai_response(message, context_info), 'data': None}
+
+        return {'response': "I couldn't find that info. Please check the spelling.", 'data': None}
