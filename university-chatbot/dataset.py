@@ -1,8 +1,8 @@
 # dataset.py
-# Expanded training sentences with ACRONYMS to teach the ML model.
+# MASSIVELY Expanded training sentences to handle random/compound queries.
 
 TRAINING_QUERIES = [
-    # --- Syllabus & Course Content ---
+    # --- SYLLABUS & COURSES ---
     ("syllabus for Engineering Calculus", "syllabus"), 
     ("what is covered in CSET243", "syllabus"),
     ("course content for Information Management Systems", "syllabus"), 
@@ -12,8 +12,15 @@ TRAINING_QUERIES = [
     ("topics in DS", "syllabus"),
     ("web sec syllabus", "syllabus"),
     ("AI course content", "syllabus"),
+    ("credits for CSET301", "syllabus"),
+    ("is CSET201 a 4 credit course", "syllabus"),
+    ("department for web security", "syllabus"),
+    ("course code for AI", "syllabus"),
+    ("show me the curriculum", "syllabus"),
+    ("what modules are in cloud computing", "syllabus"),
+    ("download syllabus", "syllabus"),
 
-    # --- Professor & Contact Info ---
+    # --- PROFESSORS & CONTACTS ---
     ("who teaches Data Structures", "professor"), 
     ("contact details for the UI/UX professor", "professor"), 
     ("where does Dr. Vikram sit", "professor"), 
@@ -24,6 +31,17 @@ TRAINING_QUERIES = [
     ("Web Security teacher", "professor"),
     ("Priya ma'am office", "professor"),
     ("Vikram sir cabin", "professor"),
+    ("email of Rajesh", "professor"),
+    ("how to contact Dr. Singh", "professor"),
+    ("is Priya Sharma available", "professor"),
+    ("specialization of Vikram", "professor"),
+    ("HOD of CSE", "professor"),
+    ("teacher for mathematics", "professor"),
+    ("meet the faculty", "professor"),
+    ("office hours for Sharma", "professor"),
+    ("Priya office", "professor"),
+    ("Rajesh email", "professor"),
+    ("Vikram department", "professor"),
 
     # --- PYQ (Past Year Questions) ---
     ("past year questions for Probability and Statistics", "pyq"), 
@@ -32,15 +50,24 @@ TRAINING_QUERIES = [
     ("PYQ for ML", "pyq"),
     ("DS previous papers", "pyq"),
     ("last year paper AI", "pyq"),
+    ("download old papers", "pyq"),
+    ("sample paper for calculus", "pyq"),
+    ("mid sem question paper", "pyq"),
+    ("end term papers", "pyq"),
 
-    # --- Deadlines (Reading) ---
+    # --- DEADLINES (Reading) ---
     ("when is the assignment due", "deadline"), 
     ("upcoming deadlines", "deadline"), 
     ("is there any work pending", "deadline"),
     ("show passed deadlines", "deadline_history"),
     ("history of tasks", "deadline_history"),
+    ("what is due next week", "deadline"),
+    ("any homework left", "deadline"),
+    ("check my schedule", "deadline"),
+    ("list all tasks", "deadline"),
+    ("show completed work", "deadline_history"),
 
-    # --- Deadlines (Writing) ---
+    # --- DEADLINES (Writing) ---
     ("add deadline", "add_deadline_intent"),
     ("I want to add a task", "add_deadline_intent"),
     ("remind me to submit project", "add_deadline_intent"),
@@ -50,16 +77,32 @@ TRAINING_QUERIES = [
     ("I finished the Web Sec Project", "mark_deadline_intent"),
     ("ML assignment completed", "mark_deadline_intent"),
     ("mark DS homework as done", "mark_deadline_intent"),
+    ("remove task from list", "mark_deadline_intent"),
+    ("update status completed", "mark_deadline_intent"),
+    ("create new reminder", "add_deadline_intent"),
 
-    # --- Location ---
+    # --- LOCATIONS ---
     ("where is the library", "location"), 
     ("how to get to the computer lab", "location"),
     ("location of cafeteria", "location"),
     ("lab location", "location"),
     ("where is the canteen", "location"),
+    ("admin block map", "location"),
+    ("where is room 404", "location"),
+    ("is the gym open", "location"),
+    ("cafeteria timings", "location"),
+    ("library floor", "location"),
+    ("find the auditorium", "location"),
+    ("directions to admission office", "location"),
 
-    # --- Greeting ---
+    # --- GREETING & GENERAL ---
     ("hi", "greeting"), 
     ("hello", "greeting"),
     ("help", "greeting"),
+    ("hey", "greeting"),
+    ("good morning", "greeting"),
+    ("what can you do", "greeting"),
+    ("start", "greeting"),
+    ("restart", "greeting"),
+    ("who are you", "greeting"),
 ]
